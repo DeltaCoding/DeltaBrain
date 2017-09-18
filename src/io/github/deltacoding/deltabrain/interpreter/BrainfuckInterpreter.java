@@ -54,13 +54,25 @@ public class BrainfuckInterpreter {
 				break;
 				
 			case '[':
-				if(this.memory[this.dp] == 0)
-					this.ip = this.searchForClosingBracket();
+				if(this.memory[this.dp] == 0) {
+					int tmp = this.searchForClosingBracket();
+					if(tmp == -1) {
+						System.err.println("[ERROR] Could not find matching closing bracket, interpretation aborted");
+						System.exit(-1);
+					}
+					this.ip = tmp;
+				}
 				break;
 				
 			case ']':
-				if(this.memory[this.dp] != 0)
-					this.ip = this.searchForOpeningBracket();
+				if(this.memory[this.dp] != 0) {
+					int tmp = this.searchForOpeningBracket();
+					if(tmp == -1) {
+						System.err.println("[ERROR] Could not find matching opening bracket, interpretation aborted");
+						System.exit(-1);
+					}
+					this.ip = tmp;
+				}
 				break;
 			}
 			this.ip++;
