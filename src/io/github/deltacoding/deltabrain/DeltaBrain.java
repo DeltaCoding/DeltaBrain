@@ -10,7 +10,7 @@ import io.github.deltacoding.deltabrain.interpreter.BrainfuckInterpreter;
 public class DeltaBrain {
 
 	public static void main(String[] args) {
-		if(args.length >= 0) {
+		if(args.length >= 1) {
 			if(args[0].equals("genHW")) {
 				try {
 					File tmp = new File("HelloWorld.bf");
@@ -22,6 +22,7 @@ public class DeltaBrain {
 				}
 			} else {
 				BrainfuckInterpreter bfi = new BrainfuckInterpreter(args[0]);
+				bfi.checkBracketCount();
 				bfi.execute();
 			}
 		} else {

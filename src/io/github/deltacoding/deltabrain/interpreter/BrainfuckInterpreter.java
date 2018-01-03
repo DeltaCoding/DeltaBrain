@@ -3,6 +3,7 @@ package io.github.deltacoding.deltabrain.interpreter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Stack;
 
 public class BrainfuckInterpreter {
 
@@ -10,6 +11,8 @@ public class BrainfuckInterpreter {
 	private int dp;
 	private char[] code;
 	private int ip;
+	
+	private Stack<Integer> brackets;
 	
 	public BrainfuckInterpreter(String file) {
 		this.memory = new byte[30000];
@@ -20,6 +23,7 @@ public class BrainfuckInterpreter {
 			System.err.println("[ERROR] Could not find the file '" + file + "'");
 		}
 		this.ip = 0;
+		this.brackets = new Stack<Integer>();
 	}
 	
 	public void execute() {
@@ -54,24 +58,16 @@ public class BrainfuckInterpreter {
 				break;
 				
 			case '[':
-				if(this.memory[this.dp] == 0) {
-					int tmp = this.searchForClosingBracket();
-					if(tmp == -1) {
-						System.err.println("[ERROR] Could not find matching closing bracket, interpretation aborted");
-						System.exit(-1);
-					}
-					this.ip = tmp;
+				if(this.memory[this.dp] != 0) {
+					this.brackets.push(this.ip);
 				}
 				break;
 				
 			case ']':
 				if(this.memory[this.dp] != 0) {
-					int tmp = this.searchForOpeningBracket();
-					if(tmp == -1) {
-						System.err.println("[ERROR] Could not find matching opening bracket, interpretation aborted");
-						System.exit(-1);
-					}
-					this.ip = tmp;
+					this.ip = this.brackets.peek();
+				} else {
+					this.brackets.pop();
 				}
 				break;
 			}
@@ -79,37 +75,20 @@ public class BrainfuckInterpreter {
 		}
 	}
 	
-	private int searchForClosingBracket() {
-		int nestedBrackets = 0;
-		for(int i = this.ip + 1; i < this.code.length - 1; i++) {
-			if(this.code[i] == '[') {
-				nestedBrackets++;
-			} else if(this.code[i] == ']') {
-				if(nestedBrackets == 0) {
-					return i;
-				} else {
-					nestedBrackets--;
-				}
-			}
+	public void checkBracketCount() {
+		int opening = 0;
+		int closing = 0;
+		
+		for(char c : this.code) {
+			if(c == '[')
+				opening++;
+			else if(c == ']')
+				closing++;
 		}
 		
-		return -1;
+		if(opening != closing) {
+			System.err.println("[ERROR] The amount of opening and closing brackets do not match. Interpretation will not be executed.");
+			System.exit(-1);
+		}
 	}
-	
-	private int searchForOpeningBracket() {
-		int nestedBrackets = 0;
-		for(int i = this.ip - 1; i > 0; i--) {
-			if(this.code[i] == ']') {
-				nestedBrackets++;
-			} else if(this.code[i] == '[') {
-				if(nestedBrackets == 0) {
-					return i;
-				} else {
-					nestedBrackets--;
-				}
-			}
-		}
-		
-		return -1;
-	}	
 }
